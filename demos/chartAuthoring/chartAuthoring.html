@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../node_modules/infusion/src/lib/normalize/css/normalize.css" />
+        <link rel="stylesheet" type="text/css" href="../../node_modules/infusion/src/framework/core/css/fluid.css" />
+        <link rel="stylesheet" type="text/css" href="../../node_modules/infusion/src/framework/core/css/fluidDebugging.css" />
+        <link rel="stylesheet" type="text/css" href="../../node_modules/infusion/src/components/overviewPanel/css/OverviewPanel.css" />
+        <link rel="stylesheet" type="text/css" href="../../node_modules/infusion/src/components/inlineEdit/css/InlineEdit.css" />
+
+        <script src="../../node_modules/infusion/src/lib/jquery/core/js/jquery.js"></script>
+        <script src="../../node_modules/infusion/src/lib/jquery/ui/js/jquery-ui.js"></script>
+        
+        <script src="../../node_modules/infusion/src/framework/core/js/jquery.keyboard-a11y.js"></script>
+        <script src="../../node_modules/infusion/src/framework/core/js/Fluid.js"></script>
+        <script src="../../node_modules/infusion/src/framework/core/js/FluidDocument.js"></script>
+        <script src="../../node_modules/infusion/src/framework/core/js/FluidRequests.js"></script>
+        <script src="../../node_modules/infusion/src/framework/core/js/FluidIoC.js"></script>
+        <script src="../../node_modules/infusion/src/framework/core/js/DataBinding.js"></script>
+        <script src="../../node_modules/infusion/src/framework/core/js/ModelTransformation.js"></script>
+        <script src="../../node_modules/infusion/src/framework/core/js/ModelTransformationTransforms.js"></script>
+        <script src="../../node_modules/infusion/src/framework/enhancement/js/ContextAwareness.js"></script>
+        <script src="../../node_modules/infusion/src/framework/enhancement/js/ProgressiveEnhancement.js"></script>
+        <script src="../../node_modules/infusion/src/framework/core/js/FluidView.js"></script>
+        <script src="../../node_modules/infusion/src/framework/core/js/ResourceLoader.js"></script>
+        <!-- Some of these definitions will be factored out into FluidViewDebuggingCore.js
+        <script src="../../node_modules/infusion/src/framework/core/js/FluidViewDebugging.js"></script>
+        -->
+        <script src="../../node_modules/infusion/src/components/inlineEdit/js/InlineEdit.js"></script>
+
+        <script src="../../node_modules/infusion/src/components/tooltip/js/Tooltip.js"></script>
+
+        <script src="../../node_modules/infusion/src/components/textToSpeech/js/TextToSpeech.js"></script>
+
+        <script src="../../node_modules/d3/d3.js"></script>
+
+        <script src="../../node_modules/flocking/dist/flocking-base.js"></script>
+        <script src="../../node_modules/flocking/src/ugens/oscillators.js"></script>
+        <script src="../../node_modules/flocking/src/ugens/math.js"></script>
+        <script src="../../node_modules/flocking/src/ugens/envelopes.js"></script>
+        <script src="../../node_modules/flocking/src/ugens/midi.js"></script>
+        <script src="../../node_modules/flocking/src/ugens/scheduling.js"></script>
+
+        <script src="../../node_modules/chartAuthoring/src/js/flockInit.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/valueBinding.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/percentage.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/transformations.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/templateInjection.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/d3ViewComponent.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/svgDrawingArea.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/totalRelaying.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/legend.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/pie.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/pieChart.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/d3Utils.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/utils.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/dataEntry.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/dataEntryPanel.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/electricPianoBand.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/unitDivisorSonificationStrategy.js"></script>
+
+        <script src="../../node_modules/chartAuthoring/src/js/sonifier.js"></script>
+        <script src="../../node_modules/chartAuthoring/src/js/chartAuthoring.js"></script>
+
+        <script src="../../node_modules/chartAuthoring/demos/src/js/chartAuthoring-demo.js"></script>
+
+        <script src="../../src/js/FluidViewDebuggingCore.js"></script>
+        <script src="../../src/js/ComponentGraph.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="../../node_modules/chartAuthoring/demos/src/css/chartAuthoring-demo.css" />
+
+
+        <title>Chart Authoring Tool - Authoring Demo</title>
+    </head>
+
+    <body>
+
+            <div class="floe-chartAuthoring-container">
+
+                <div id="floec-overviewPanel" class="fl-overviewPanel-container"></div>
+
+                <div id="floec-chartAuthoring"></div>
+
+                <script>
+                    floe.chartAuthoring.demo("#floec-chartAuthoring", {
+                        distributeOptions: {
+                            record: "../../node_modules/chartAuthoring/src/html",
+                            target: "{that templateLoader}.options.terms.templatePrefix"
+                        }
+                    });
+                    
+                    fluid.author.componentGraphPanel("body");
+                </script>
+            </div>
+
+    </body>
+</html>

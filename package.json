@@ -1,0 +1,38 @@
+{
+    "name": "fluid-authoring",
+    "description": "Tools for perceiving, authoring and debugging applications developed using Fluid's Infusion framework",
+    "version": "0.0.1",
+    "author": "Fluid Project",
+    "bugs": "http://issues.fluidproject.org/browse/FLUID",
+    "homepage": "http://www.fluidproject.org/",
+    "dependencies": {
+        "infusion": "2.0.0-dev.20161002T002156Z.a2802df",
+        "chartAuthoring": "amb26/chartAuthoring#FLOE-484"
+    },
+    "license": "(BSD-3-Clause OR ECL-2.0)",
+    "keywords": [
+        "infusion",
+        "framework",
+        "application",
+        "fluid",
+        "IoC",
+        "Inversion of Control",
+        "MVC",
+        "evented"
+    ],
+    "repository": "git://github.com/fluid-project/fluid-authoring.git",
+    "scripts": {
+    },
+    "engines": {
+        "node": ">=4.2.1",
+        "npm": ">=3.0.0"
+    },
+    "devDependencies": {
+        "eslint-config-fluid": "1.0.0",
+        "fluid-grunt-eslint": "18.1.2",
+        "grunt": "1.0.1",
+        "grunt-contrib-copy": "1.0.0",
+        "grunt-exec": "1.0.0",
+        "grunt-jsonlint": "1.1.0"
+    }
+}
