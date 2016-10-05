@@ -1,0 +1,34 @@
+.fld-author-pane {
+    width: 100%;
+    height: 100%;
+    font-family: OpenSans, 'Helvetica Neue', Helvetica, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    color: black;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+.fld-author-componentGraphHolder {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+.fld-author-componentGraph {
+    width: 2000px;
+    height: 2000px;
+}
+
+.fld-author-componentView {
+    width: 200px;
+    height: 400px;
+    background-color: #5ff;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+}
+
+.fld-author-componentGraph {
+    position: relative;
+}

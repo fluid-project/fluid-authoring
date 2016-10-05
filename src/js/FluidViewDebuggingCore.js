@@ -42,13 +42,13 @@ var fluid_2_0_0 = fluid_2_0_0 || {};
             holderOpen: "fl-debug-holder-open",
             holderClosed: "fl-debug-holder-closed"
         },
-        markup: {
-            holder: "<div class=\"flc-debug-holder fl-debug-holder\"><div class=\"flc-debug-open-pane-trigger fl-debug-open-pane-trigger\"></div><div class=\"flc-debug-pane fl-debug-pane\"></div></div></div>",
+        markup: { // TODO: outer level is still in "debug" namespace using internal CSS file
+            holder: "<div class=\"flc-debug-holder fl-debug-holder\"><div class=\"flc-debug-open-pane-trigger fl-debug-open-pane-trigger\"></div><div class=\"fld-author-pane\"></div></div></div>",
             pane: "" // This should be overridden with pane markup
         },
         selectors: {
-            holder: ".fl-debug-holder",
-            pane: ".fl-debug-pane",
+            holder: ".flc-debug-holder",
+            pane: ".fld-author-pane",
             openPaneTrigger: ".flc-debug-open-pane-trigger"
         },
         events: {
