@@ -6,7 +6,7 @@
     "bugs": "http://issues.fluidproject.org/browse/FLUID",
     "homepage": "http://www.fluidproject.org/",
     "dependencies": {
-        "infusion": "2.0.0-dev.20161002T002156Z.a2802df",
+        "infusion": "amb26/infusion#FLUID-5903",
         "chartAuthoring": "amb26/chartAuthoring#FLOE-484"
     },
     "license": "(BSD-3-Clause OR ECL-2.0)",
