@@ -78,4 +78,25 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
         that.events.onMarkupReady.fire();
     };
 
+    fluid.author.frameworkGrades = fluid.frameworkGrades;
+
+    fluid.author.ignorableGrades = ["fluid.resolveRoot", "fluid.resolveRootSingle"];
+
+    fluid.author.filterGrades = function (gradeNames, ignorableGrades) {
+        var highestFrameworkIndex = -1;
+        var output = [];
+        fluid.each(gradeNames, function (gradeName) { // TODO: remove fluid.indexOf
+            var findex = fluid.author.frameworkGrades.indexOf(gradeName);
+            if (findex > highestFrameworkIndex) {
+                highestFrameworkIndex = findex;
+            } else if (findex === -1 && ignorableGrades.indexOf(gradeName) === -1 && gradeName.indexOf("{") === -1) {
+                output.push(gradeName);
+            }
+        });
+        if (highestFrameworkIndex !== -1) {
+            output.push(fluid.author.frameworkGrades[highestFrameworkIndex]);
+        }
+        return output;
+    };
+
 })(jQuery, fluid_2_0_0);

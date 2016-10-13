@@ -8,6 +8,20 @@
     overflow-x: hidden;
 }
 
+.fld-author-svgPane {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: -1;
+    left: 0px;
+    top: 0px;
+}
+
+.fld-author-arrow {
+    stroke: #888;
+    fill: #9dd;
+}
+
 .fld-author-componentGraphHolder {
     width: 100%;
     height: 100%;
