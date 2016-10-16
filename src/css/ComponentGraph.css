@@ -2,7 +2,7 @@
     width: 100%;
     height: 100%;
     font-family: OpenSans, 'Helvetica Neue', Helvetica, Helvetica, Arial, sans-serif;
-    font-size: 16px;
+    font-size: 13px;
     color: black;
     overflow-y: hidden;
     overflow-x: hidden;
@@ -37,12 +37,21 @@
 .fld-author-componentView {
     width: 200px;
     height: 400px;
-    background-color: #5ff;
+    background-color: #6df;
+    border: 1px solid #777;
     position: absolute;
     left: 20px;
     top: 20px;
 }
 
+.fld-author-componentView td {
+    vertical-align: top;
+}
+
 .fld-author-componentGraph {
     position: relative;
+}
+
+.fld-author-gradeRow {
+   border-bottom: 1px solid #aaa;
 }
