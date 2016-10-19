@@ -35,13 +35,18 @@
 }
 
 .fld-author-componentView {
-    width: 200px;
-    height: 400px;
+/*    width: 200px;
+    height: 400px; */
     background-color: #6df;
     border: 1px solid #777;
     position: absolute;
     left: 20px;
     top: 20px;
+}
+
+.fld-author-componentView > table {
+    border-collapse: separate;
+    border-spacing: 0px;
 }
 
 .fld-author-componentView td {
@@ -52,6 +57,27 @@
     position: relative;
 }
 
-.fld-author-gradeRow {
-   border-bottom: 1px solid #aaa;
+.fl-author-componentRow {
+   border-bottom: 1px solid #6cd;
+}
+
+.fld-author-componentView > tbody > tr > td {
+   border-top: 1px solid #6cd;
+}
+
+.fld-author-componentView > tbody > tr:first-child > td {
+   border:none;
+}
+
+td.fld-author-modelView {
+   padding: 0px;
+}
+
+table.fld-author-JSONView {
+   border-collapse: collapse;
+}
+
+.fld-author-member {
+   position: absolute;
+   top: -1.5em;
 }

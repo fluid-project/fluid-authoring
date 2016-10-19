@@ -43,7 +43,7 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
     });
 
     fluid.defaults("fluid.author.svgPaneInGraphPanel", {
-        gradeNames: ["fluid.author.svgPane", "fluid.author.domPositioning"],
+        gradeNames: ["fluid.author.svgPane", "fluid.author.domSizing"],
         parentContainer: "{fluid.author.componentGraphPanel}.dom.componentGraph",
         markup: {
             container: "<svg class=\"fld-author-svgPane\"></svg>"
@@ -185,7 +185,7 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
 
 
     fluid.defaults("fluid.author.componentGraph", {
-        gradeNames: ["fluid.viewComponent", "fluid.author.viewContainer", "fluid.author.domPositioning"],
+        gradeNames: ["fluid.viewComponent", "fluid.author.viewContainer", "fluid.author.domSizing"],
         events: {
             createComponentView: null,
             createArrow: null,
@@ -561,6 +561,7 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
     };
 
     fluid.author.renderContainer = function (that, renderMarkup, parentContainer) {
+        fluid.log("Rendering container for " + that.id + " rawComponentId " + that.options.rawComponentId);
         var containerMarkup = renderMarkup();
         var container = $(containerMarkup);
         parentContainer.append(container);
@@ -599,19 +600,26 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
 
     // A component with model-bound fields left, top, width, height which map to the equivalent CSS properties
     fluid.defaults("fluid.author.domPositioning", {
-        // gradeNames: "fluid.newViewComponent",
         modelListeners: {
             "layout.left":   "fluid.author.numberToCSS({that}.container, {change}.value, left)",
-            "layout.top":    "fluid.author.numberToCSS({that}.container, {change}.value, top)",
-            "layout.width":  "fluid.author.numberToCSS({that}.container, {change}.value, width)",
-            "layout.height": "fluid.author.numberToCSS({that}.container, {change}.value, height)"
-        },
-        invokers: {
-            readBounds: "fluid.author.domPositioning.readBounds({that})"
+            "layout.top":    "fluid.author.numberToCSS({that}.container, {change}.value, top)"
         }
     });
 
-    fluid.author.domPositioning.readBounds = function (that) {
+    fluid.defaults("fluid.author.domSizing", {
+        modelListeners: {
+            "layout.width":  "fluid.author.numberToCSS({that}.container, {change}.value, width)",
+            "layout.height": "fluid.author.numberToCSS({that}.container, {change}.value, height)"
+        }
+    });
+
+    fluid.defaults("fluid.author.domReadBounds", {
+        invokers: {
+            readBounds: "fluid.author.domReadBounds.readBounds({that})"
+        }
+    });
+
+    fluid.author.domReadBounds.readBounds = function (that) {
         var width = that.container.outerWidth();
         var height = that.container.outerHeight();
         that.applier.change("layout", {
@@ -633,24 +641,44 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
     };
 
     fluid.defaults("fluid.author.componentView", {
-        gradeNames: ["fluid.newViewComponent", "fluid.author.containerRenderingView", "fluid.indexedDynamicComponent", "fluid.author.domPositioning"],
+        gradeNames: ["fluid.newViewComponent", "fluid.author.containerRenderingView", "fluid.indexedDynamicComponent", "fluid.author.domPositioning", "fluid.author.domReadBounds"],
         selectors: {
-            gradeRow: ".fld-author-gradeRow"
+            gradeRows: ".fld-author-gradeRows",
+            modelView: ".fld-author-modelView"
+        },
+        components: {
+            modelView: {
+                type: "fluid.author.JSONView",
+                options: {
+                    parentContainer: "{componentView}.dom.modelView"
+                }
+            }
         },
         members: { // Holds the target component at a safe location where it will not confuse the current faulty framework
             targetHolder: {
                 that: "@expand:fluid.author.componentView.lookupTarget({componentGraph}, {that}.options.rawComponentId)",
                 // Force evaluation of all renderer methods so available during construction
-                renderGradeRow: "{that}.renderGradeRow"
+                renderMemberRow: "{that}.renderMemberRow",
+                renderGradeRows: "{that}.renderGradeRows",
+                renderModelRow: "{that}.renderModelRow"
             }
         },
         markup: {
-            container: "<table class=\"fld-author-componentView\"><tbody>%childRows</tbody></table>",
-            gradeRow: "<tr class=\"fld-author-gradeRow\"><td>grades:</td><td>%gradeNames</td></tr>"
+            container: "<div class=\"fld-author-componentView\"><table>%childRows</table></div>",
+            memberRow: "<div class=\"fld-author-member\">%member</div>",
+            gradeRows: "<tbody class=\"fld-author-gradeRows\">%gradeRows</tbody>",
+            gradeRow:  "<tr class=\"fld-author-gradeRow fl-author-componentRow\"><td>grades:</td><td>%gradeName</td></tr>",
+            gradeRow2: "<tr class=\"fld-author-gradeRow fl-author-componentRow\"><td></td><td>%gradeName</td></tr>",
+            modelRows: "<tbody class=\"fld-author-modelRows\">%modelRows</tbody>",
+            modelRow:  "<tr class=\"fld-author-modelRow fl-author-componentRow\"><td>model:</td><td class=\"fld-author-modelView\"></td></tr>",
+            modelRow2: "<tr class=\"fld-author-modelRow fl-author-componentRow\"><td></td><td class=\"fld-author-modelView\"></td></tr>"
         },
         invokers: {
             renderMarkup: "fluid.author.componentView.renderMarkup({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
-            renderGradeRow: "fluid.author.componentView.renderGradeRow({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
+            renderMemberRow: "fluid.author.componentView.renderMemberRow({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
+            renderGradeRows: "fluid.author.componentView.renderGradeRows({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
+            //renderModelRows: "fluid.author.componentView.renderModelRow({that}.modelView, {that}.modelView.renderMarkup, {that}.options.markup)",
+            renderModelRow: "fluid.identity({that}.options.markup.modelRow)",
             refreshView: "fluid.author.componentView.refreshView({that})"
         }
     });
@@ -661,26 +689,43 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
     };
 
     fluid.author.componentView.refreshView = function (componentView) {
-        var gradeRow = componentView.renderGradeRow();
-        componentView.locate("gradeRow").replaceWith(gradeRow);
+        var gradeRows = componentView.renderGradeRows();
+        componentView.locate("gradeRows").replaceWith(gradeRows);
     };
 
-    fluid.author.componentView.renderGradeRow = function (componentGraph, componentView, that, markupBlock) {
+    fluid.author.componentView.renderMemberRow = function (componentGraph, componentView, that, markupBlock) {
+        var shadow = componentGraph.idToShadow[componentView.options.rawComponentId];
+        var coords = fluid.author.componentGraph.getCoordinates(componentGraph, shadow.path);
+        return coords.memberName === undefined ? "" : fluid.stringTemplate(markupBlock.memberRow, {member: coords.memberName});
+    };
+
+    fluid.author.componentView.renderGradeRows = function (componentGraph, componentView, that, markupBlock) {
         var gradeNames = [that.typeName].concat(fluid.makeArray(fluid.get(that, ["options", "gradeNames"])));
         var filteredGrades = fluid.author.filterGrades(gradeNames, fluid.author.ignorableGrades);
         var finalGrades = fluid.author.dedupeGrades(filteredGrades);
-        var model = {
-            gradeNames: finalGrades.join(", ")
-        };
-        return fluid.stringTemplate(markupBlock.gradeRow, model);
+        var rows = fluid.transform(finalGrades, function (gradeName, index) {
+            return fluid.stringTemplate(markupBlock[index === 0 ? "gradeRow" : "gradeRow2"], {gradeName: gradeName});
+        });
+        var gradeRows = rows.join("");
+        return fluid.stringTemplate(markupBlock.gradeRows, {gradeRows: gradeRows});
     };
 
     fluid.author.componentView.renderMarkup = function (componentGraph, componentView, that, markupBlock) {
         var containerModel = {
-            childRows: componentView.renderGradeRow()
+            childRows: componentView.renderMemberRow() + componentView.renderGradeRows() + componentView.renderModelRow()
         };
         var containerMarkup = fluid.stringTemplate(markupBlock.container, containerModel);
         return containerMarkup;
     };
+
+    fluid.defaults("fluid.author.JSONView", {
+        gradeNames: ["fluid.newViewComponent", "fluid.author.containerRenderingView"],
+        markup: {
+            container: "<table class=\"fld-author-JSONView\"><tr><td>42</td></tr></table>"
+        },
+        invokers: {
+            renderMarkup: "fluid.identity({that}.options.markup.container)"
+        }
+    });
 
 })(jQuery, fluid_2_0_0);
