@@ -392,11 +392,7 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
         fluid.log("LAYOUT BEGUN");
         var records = [];
         fluid.each(componentGraph.idToViewMember, function (viewMember, id) {
-            var togo = {};
-            togo.shadow = componentGraph.idToShadow[id];
-            togo.coords = fluid.author.componentGraph.getCoordinates(componentGraph, togo.shadow.path);
-            togo.rowIndex = togo.coords.parsed.length;
-            records.push(togo);
+            records.push(viewMember.viewRecord);
         });
         records.sort(fluid.author.depthComparator);
         var o = componentGraph.options;
@@ -640,6 +636,26 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
         return outGrades;
     };
 
+// These produce arrays of markup representing table cells - perhaps instead we want arrays of JSON markup    
+    fluid.author.headerCellSource = function (headerContents, count) {
+        return ["<td>" + headerContents + "</td>"].concat(fluid.generate(count - 1, "<td></td>"));
+    };
+    
+    fluid.author.arrayCellSource = function (array) {
+        return fluid.transform(array, function (element) {
+            return "<td>" + element + "</td>";
+        });
+    };
+    
+    fluid.author.computeViewRecord = function (componentGraph, targetId) {
+        var togo = Object.create(fluid.author.computeViewRecord.prototype);
+        togo.shadow = componentGraph.idToShadow[rawComponentId];
+        togo.that = togo.shadow.that;
+        togo.coords = fluid.author.componentGraph.getCoordinates(componentGraph, togo.shadow.path);
+        togo.rowIndex = togo.coords.parsed.length;
+        return Object.freeze(togo);  
+    };
+
     fluid.defaults("fluid.author.componentView", {
         gradeNames: ["fluid.newViewComponent", "fluid.author.containerRenderingView", "fluid.indexedDynamicComponent", "fluid.author.domPositioning", "fluid.author.domReadBounds"],
         selectors: {
@@ -654,13 +670,28 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
                 }
             }
         },
-        members: { // Holds the target component at a safe location where it will not confuse the current faulty framework
-            targetHolder: {
-                that: "@expand:fluid.author.componentView.lookupTarget({componentGraph}, {that}.options.rawComponentId)",
-                // Force evaluation of all renderer methods so available during construction
-                renderMemberRow: "{that}.renderMemberRow",
-                renderGradeRows: "{that}.renderGradeRows",
-                renderModelRow: "{that}.renderModelRow"
+        members: {
+            viewRecord: "@expand:fluid.author.computeViewRecord({componentGraph}, {that}.options.rawComponentId)",
+        },
+        model: {
+            gradeNames: {
+                header: "grades:",
+                sourceData: 
+            },
+            model: { // Model area representing target component's model
+                header: "model:"
+            }
+        },
+        elements: {
+            gradeNames: {
+                header: "grades:",
+                sourceData: "{that}.renderGradeNames",
+                cellSourceFunc: "fluid.author.arrayCellSource"
+            },
+            model: {
+                header: "model:",
+                // TODO: this is dynamic! Changes both with the UI of the JSON view as well as with the underlying model data
+                sourceData: "{that}.modelView.arrayCellSource"
             }
         },
         markup: {
@@ -674,6 +705,7 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
             modelRow2: "<tr class=\"fld-author-modelRow fl-author-componentRow\"><td></td><td class=\"fld-author-modelView\"></td></tr>"
         },
         invokers: {
+            renderGradeNames: "fluid.author.renderGradeNames({that}.viewRecord.that)",
             renderMarkup: "fluid.author.componentView.renderMarkup({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
             renderMemberRow: "fluid.author.componentView.renderMemberRow({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
             renderGradeRows: "fluid.author.componentView.renderGradeRows({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
@@ -682,11 +714,6 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
             refreshView: "fluid.author.componentView.refreshView({that})"
         }
     });
-
-    fluid.author.componentView.lookupTarget = function (componentGraph, rawComponentId) {
-        var shadow = componentGraph.idToShadow[rawComponentId];
-        return shadow.that;
-    };
 
     fluid.author.componentView.refreshView = function (componentView) {
         var gradeRows = componentView.renderGradeRows();
@@ -698,11 +725,17 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
         var coords = fluid.author.componentGraph.getCoordinates(componentGraph, shadow.path);
         return coords.memberName === undefined ? "" : fluid.stringTemplate(markupBlock.memberRow, {member: coords.memberName});
     };
-
-    fluid.author.componentView.renderGradeRows = function (componentGraph, componentView, that, markupBlock) {
+    
+    fluid.author.componentView.renderGradeNames = function (that) {
         var gradeNames = [that.typeName].concat(fluid.makeArray(fluid.get(that, ["options", "gradeNames"])));
         var filteredGrades = fluid.author.filterGrades(gradeNames, fluid.author.ignorableGrades);
         var finalGrades = fluid.author.dedupeGrades(filteredGrades);
+        return finalGrades;
+    };
+
+
+    fluid.author.componentView.renderGradeRows = function (componentGraph, componentView, that, markupBlock) {
+
         var rows = fluid.transform(finalGrades, function (gradeName, index) {
             return fluid.stringTemplate(markupBlock[index === 0 ? "gradeRow" : "gradeRow2"], {gradeName: gradeName});
         });
