@@ -646,7 +646,9 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
             return "<td>" + element + "</td>";
         });
     };
-    
+    /** Construct a "view record" holding useful coordinates based on the target component. These are used during
+     * layout as well as rendering */
+     
     fluid.author.computeViewRecord = function (componentGraph, targetId) {
         var togo = Object.create(fluid.author.computeViewRecord.prototype);
         togo.shadow = componentGraph.idToShadow[rawComponentId];
@@ -659,10 +661,19 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
     fluid.defaults("fluid.author.componentView", {
         gradeNames: ["fluid.newViewComponent", "fluid.author.containerRenderingView", "fluid.indexedDynamicComponent", "fluid.author.domPositioning", "fluid.author.domReadBounds"],
         selectors: {
-            gradeRows: ".fld-author-gradeRows",
-            modelView: ".fld-author-modelView"
+//            modelView: ".fld-author-modelView",
+//            gradesView: ".fld-author-gradesView"
         },
-        components: {
+        mergePolicy: {
+            elements: "noexpand"
+        },
+/*        components: {
+            gradesView: {
+                type: "fluid.author.gradesView",
+                options: {
+                    parentContainer: "{componentView}.dom.gradesView"
+                }
+            },
             modelView: {
                 type: "fluid.author.JSONView",
                 options: {
@@ -670,47 +681,40 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
                 }
             }
         },
+*/
         members: {
             viewRecord: "@expand:fluid.author.computeViewRecord({componentGraph}, {that}.options.rawComponentId)",
         },
-        model: {
-            gradeNames: {
-                header: "grades:",
-                sourceData: 
-            },
-            model: { // Model area representing target component's model
-                header: "model:"
-            }
-        },
+        // From these, synthesize:
+        // i) row markup template holding "cell root" which we can then use to form the container of:
+        // ii) dynamic child components for JSONViewEach
+        // iii) "listeners" which update the RHS - generally via manual model relay 
+        //    grades are funny in that they are not really dynamic, but appear to change as a result of not being computed at the point we first witness the component 
         elements: {
             gradeNames: {
                 header: "grades:",
-                sourceData: "{that}.renderGradeNames",
-                cellSourceFunc: "fluid.author.arrayCellSource"
+                sourceFunc: "{that}.renderGradeNames",
+                cellClass: "fld-author-gradesView"
             },
             model: {
                 header: "model:",
                 // TODO: this is dynamic! Changes both with the UI of the JSON view as well as with the underlying model data
-                sourceData: "{that}.modelView.arrayCellSource"
+                sourceModel: "{that}.viewRecord.that.model",
+                cellClass: "fld-author-modelView"
             }
         },
         markup: {
             container: "<div class=\"fld-author-componentView\"><table>%childRows</table></div>",
-            memberRow: "<div class=\"fld-author-member\">%member</div>",
-            gradeRows: "<tbody class=\"fld-author-gradeRows\">%gradeRows</tbody>",
-            gradeRow:  "<tr class=\"fld-author-gradeRow fl-author-componentRow\"><td>grades:</td><td>%gradeName</td></tr>",
-            gradeRow2: "<tr class=\"fld-author-gradeRow fl-author-componentRow\"><td></td><td>%gradeName</td></tr>",
-            modelRows: "<tbody class=\"fld-author-modelRows\">%modelRows</tbody>",
-            modelRow:  "<tr class=\"fld-author-modelRow fl-author-componentRow\"><td>model:</td><td class=\"fld-author-modelView\"></td></tr>",
-            modelRow2: "<tr class=\"fld-author-modelRow fl-author-componentRow\"><td></td><td class=\"fld-author-modelView\"></td></tr>"
+            memberRow: "<div class=\"fld-author-member\">%member</div>", // This just floats above the entire component - immutable
+            generalRow: "<tr class=\"%rowClass\"><td>%header</td><td class=\"%cellClass\"></td></tr>",
+            //gradeRow:  "<tr class=\"fld-author-gradeRow fl-author-componentRow\"><td>grades:</td><td class=\"fld-author-gradesView\"></td></tr>",
+            //modelRow:  "<tr class=\"fld-author-modelRow fl-author-componentRow\"><td>model:</td><td class=\"fld-author-modelView\"></td></tr>",
         },
         invokers: {
             renderGradeNames: "fluid.author.renderGradeNames({that}.viewRecord.that)",
             renderMarkup: "fluid.author.componentView.renderMarkup({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
-            renderMemberRow: "fluid.author.componentView.renderMemberRow({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
-            renderGradeRows: "fluid.author.componentView.renderGradeRows({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
-            //renderModelRows: "fluid.author.componentView.renderModelRow({that}.modelView, {that}.modelView.renderMarkup, {that}.options.markup)",
-            renderModelRow: "fluid.identity({that}.options.markup.modelRow)",
+//            renderMemberRow: "fluid.author.componentView.renderMemberRow({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
+//            renderGradeRows: "fluid.author.componentView.renderGradeRows({componentGraph}, {that}, {that}.targetHolder.that, {that}.options.markup)",
             refreshView: "fluid.author.componentView.refreshView({that})"
         }
     });
@@ -726,7 +730,7 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
         return coords.memberName === undefined ? "" : fluid.stringTemplate(markupBlock.memberRow, {member: coords.memberName});
     };
     
-    fluid.author.componentView.renderGradeNames = function (that) {
+    fluid.author.componentView.prepareGradeNames = function (that) {
         var gradeNames = [that.typeName].concat(fluid.makeArray(fluid.get(that, ["options", "gradeNames"])));
         var filteredGrades = fluid.author.filterGrades(gradeNames, fluid.author.ignorableGrades);
         var finalGrades = fluid.author.dedupeGrades(filteredGrades);
@@ -751,10 +755,13 @@ https://github.com/fluid-project/infusion/raw/master/Infusion-LICENSE.txt
         return containerMarkup;
     };
 
+
+
     fluid.defaults("fluid.author.JSONView", {
         gradeNames: ["fluid.newViewComponent", "fluid.author.containerRenderingView"],
         markup: {
-            container: "<table class=\"fld-author-JSONView\"><tr><td>42</td></tr></table>"
+            container: "<table class=\"fld-author-JSONView\">%rows</table>",
+            row: "<tr><td class=\"fld-author-JSONRow\">%row</td></tr>"
         },
         invokers: {
             renderMarkup: "fluid.identity({that}.options.markup.container)"
